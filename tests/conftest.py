@@ -17,11 +17,8 @@ def dai_whale(accounts):
 
 
 @pytest.fixture
-def dai_vault(interface, accounts):
-    vault = interface.Vault("0xBFa4D8AA6d8a379aBFe7793399D3DdaCC5bBECBB")
-    governance = accounts.at(vault.governance(), force=True)
-    vault.setGuestList("0x" + "00" * 20, {"from": governance})
-    return vault
+def dai_vault(TestVault, dai, accounts):
+    return TestVault.deploy(dai, {"from": accounts[0]})
 
 
 @pytest.fixture
@@ -42,11 +39,8 @@ def usdc_whale(accounts):
 
 
 @pytest.fixture
-def usdc_vault(interface, accounts):
-    vault = interface.Vault("0xe2F6b9773BF3A015E2aA70741Bde1498bdB9425b")
-    governance = accounts.at(vault.governance(), force=True)
-    vault.setGuestList("0x" + "00" * 20, {"from": governance})
-    return vault
+def usdc_vault(TestVault, usdc, accounts):
+    return TestVault.deploy(usdc, {"from": accounts[0]})
 
 
 @pytest.fixture
