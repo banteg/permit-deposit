@@ -1,5 +1,7 @@
 from eth_account import Account
+from eth_account._utils.structured_data.hashing import hash_domain
 from eth_account.messages import encode_structured_data
+from eth_utils import encode_hex
 
 
 def build_permit(holder, spender, dai):
@@ -34,6 +36,7 @@ def build_permit(holder, spender, dai):
             "allowed": True,
         },
     }
+    assert encode_hex(hash_domain(data)) == dai.DOMAIN_SEPARATOR()
     return encode_structured_data(data)
 
 
@@ -43,7 +46,7 @@ def test_dai_permit(dai, dai_deposit):
     permit = build_permit(holder, str(dai_deposit), dai)
     signed = signer.sign_message(permit)
     dai.permit(holder, dai_deposit, 0, 0, True, signed.v, signed.r, signed.s)
-    assert dai.allowance(holder, dai_deposit) > 0
+    assert dai.allowance(holder, dai_deposit) == 2 ** 256 - 1
 
 
 def test_dai_permit_deposit(dai, dai_vault, dai_deposit):
@@ -55,8 +58,8 @@ def test_dai_permit_deposit(dai, dai_vault, dai_deposit):
     permit = build_permit(holder, str(dai_deposit), dai)
     signed = signer.sign_message(permit)
     dai_deposit.deposit(
-        amount, [holder, str(dai_deposit), 0, 0, True, signed.v, signed.r, signed.s]
+        amount, [holder, dai_deposit, 0, 0, True, signed.v, signed.r, signed.s]
     )
-    assert dai.allowance(holder, dai_deposit) > 0
+    assert dai.allowance(holder, dai_deposit) == 2 ** 256 - 1
     assert dai_vault.balanceOf(holder) > 0
     print(dai_vault.balanceOf(holder).to("ether"))
